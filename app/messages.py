@@ -9,9 +9,12 @@ conf = {
 }
 
 base_consumer_conf = conf | {"auto.offset.reset": "earliest"}
-print(base_consumer_conf)
+single_message_conf = base_consumer_conf | {"group.id": "single"}
+batch_conf = base_consumer_conf | {"group.id": "batch"}
 
 producer = Producer(conf)
+single_message_consumer = Consumer(single_message_conf)
+batch_consumer = Consumer(batch_conf)
 
 
 def create_message(incr_num: int) -> None:

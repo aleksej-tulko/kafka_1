@@ -1,9 +1,12 @@
 from time import sleep
 from threading import Thread
-from confluent_kafka import Consumer, Producer, KafkaException
+from confluent_kafka import (
+    Consumer, KafkaError, KafkaException, Producer
+)
 
 conf = {
-    "bootstrap.servers": "192.168.1.129:9093,192.168.1.129:9095,192.168.1.129:9097",
+    "bootstrap.servers":
+    "192.168.1.129:9093,192.168.1.129:9095,192.168.1.129:9097",
 }
 
 base_consumer_conf = conf | {"auto.offset.reset": "earliest"}
@@ -34,6 +37,8 @@ def consume_infinite_loop(consumer: Consumer) -> None:
             print(
                 f"Получено сообщение: {key=}, {value=}, offset={msg.offset()}"
             )
+    except KafkaException as KE:
+        raise KafkaError(KE)
     finally:
         consumer.close()
 
@@ -55,6 +60,8 @@ def producer_infinite_loop():
             if incr_num % 10 == 0:
                 producer.flush()
             sleep(0.1)
+    except KafkaException as KE:
+        raise KafkaError(KE)
     finally:
         producer.flush()
         producer.close()
@@ -62,9 +69,20 @@ def producer_infinite_loop():
 
 
 if __name__ == "__main__":
-    t1 = Thread(target=consume_infinite_loop, args=(single_message_consumer,), daemon=True)
-    t2 = Thread(target=consume_infinite_loop, args=(batch_consumer,), daemon=True)
-    t1.start()
-    t2.start()
-
-    producer_infinite_loop()
+    single_message_consumer_thread = Thread(
+        target=consume_infinite_loop,
+        args=(single_message_consumer,),
+        daemon=True
+    )
+    batch_consumer_thread = Thread(
+        target=consume_infinite_loop,
+        args=(batch_consumer,),
+        daemon=True
+    )
+    producer_thread = Thread(
+        target=producer_infinite_loop,
+        daemon=True
+    )
+    single_message_consumer_thread.start()
+    batch_consumer_thread.start()
+    producer_thread.start()

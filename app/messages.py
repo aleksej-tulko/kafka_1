@@ -12,12 +12,8 @@ producer_conf = conf
 consumer_conf = conf.update({"auto.offset.reset": "earliest"})
 
 producer = Producer(conf)
-SingleMessageConsumer = Consumer(
-    consumer_conf.update({"group.id": "single_msg_group"})
-)
-BatchMessageConsumer = Consumer(
-    consumer_conf.update({"group.id": "batch_group"})
-)
+SingleMessageConsumer = Consumer(consumer_conf)
+BatchMessageConsumer = Consumer(consumer_conf)
 
 
 def create_message(incr_num: int) -> None:

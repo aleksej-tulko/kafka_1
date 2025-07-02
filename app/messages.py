@@ -88,3 +88,4 @@ if __name__ == "__main__":
 
     while True:
         print("Выполняется программа")
+        sleep(10)

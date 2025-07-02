@@ -64,7 +64,6 @@ def producer_infinite_loop():
         raise KafkaError(KE)
     finally:
         producer.flush()
-        producer.close()
 
 
 if __name__ == "__main__":
@@ -78,7 +77,11 @@ if __name__ == "__main__":
         args=(batch_consumer,),
         daemon=True
     )
+    producer_thread = Thread(
+        target=producer_infinite_loop,
+        args=(),
+        daemon=True
+    )
     single_message_consumer_thread.start()
     batch_consumer_thread.start()
-
-    producer_infinite_loop()
+    producer_thread.start()

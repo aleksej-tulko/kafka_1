@@ -25,5 +25,7 @@ while True:
     try:
         Thread(target=create_message(incr_num=incr_num))
         incr_num += 1
+    except Exception as ex:
+        raise RuntimeError(ex)
     finally:
         sleep(10)

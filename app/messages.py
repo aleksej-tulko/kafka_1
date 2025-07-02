@@ -73,9 +73,9 @@ def consume_batch_loop(consumer: Consumer, batch_size=10):
         if len(batch) == batch_size:
             for item in batch:
                 print(
-                    f'Получено сообщение: {item.key().decode("utf-8")}, '
+                    f'Получено сообщение в батч: {item.key().decode("utf-8")}, '
                     f'{msg.value().decode("utf-8")}, '
-                    f'offset={msg.value().decode("utf-8")}'
+                    f'offset={msg.offset()}'
                 )
             consumer.commit()
             batch.clear()

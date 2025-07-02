@@ -80,12 +80,12 @@ def consume_batch_loop(consumer: Consumer, batch_size=10):
                         f'{msg.value().decode('utf-8')}, '
                         f'offset={msg.offset()}'
                     )
+                batch.clear()
     except KafkaException as KE:
         raise KafkaError(KE)
     finally:
         consumer.commit(asynchronous=False)
         consumer.close()
-        batch.clear()
 
 
 def create_message(incr_num: int) -> None:

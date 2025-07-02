@@ -8,14 +8,10 @@ conf = {
     "192.168.1.129:9093,192.168.1.129:9095,192.168.1.129:9097",
 }
 
-producer_conf = conf
-consumer_conf = {**conf, "auto.offset.reset": "earliest"}
-
-print(consumer_conf)
+base_consumer_conf = conf | {"auto.offset.reset": "earliest"}
+print(base_consumer_conf)
 
 producer = Producer(conf)
-SingleMessageConsumer = Consumer(consumer_conf)
-BatchMessageConsumer = Consumer(consumer_conf)
 
 
 def create_message(incr_num: int) -> None:

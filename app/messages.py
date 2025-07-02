@@ -1,6 +1,5 @@
 from time import sleep
 from threading import Thread
-
 from confluent_kafka import Consumer, Producer
 
 conf = {
@@ -24,20 +23,22 @@ def create_message(incr_num: int) -> None:
         value=f'message-{incr_num}',
     )
     producer.flush()
-    producer.close()
 
 
-def producer_thread():
-    Thread(target=create_message(incr_num=incr_num))
+def producer_thread(num):
+    Thread(target=create_message, args=(num,)).start()
 
 
 incr_num = 0
 
 try:
     while True:
-        producer_thread()
+        producer_thread(incr_num)
         incr_num += 1
+        sleep(0.1)
 except Exception as ex:
     raise RuntimeError(ex)
 finally:
     sleep(10)
+    producer.flush()
+    producer.close()

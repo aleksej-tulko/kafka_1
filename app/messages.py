@@ -9,7 +9,7 @@ conf = {
 }
 
 producer_conf = conf
-consumer_conf = conf.update({"auto.offset.reset": "earliest"})
+consumer_conf = {**conf, "auto.offset.reset": "earliest"}
 
 print(consumer_conf)
 

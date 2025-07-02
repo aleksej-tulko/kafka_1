@@ -11,6 +11,8 @@ conf = {
 producer_conf = conf
 consumer_conf = conf.update({"auto.offset.reset": "earliest"})
 
+print(consumer_conf)
+
 producer = Producer(conf)
 SingleMessageConsumer = Consumer(consumer_conf)
 BatchMessageConsumer = Consumer(consumer_conf)

@@ -16,10 +16,10 @@ producer_conf = conf | {
 
 base_consumer_conf = conf | {
     "auto.offset.reset": "earliest",
-    "enable.auto.commit": True,
+    "enable.auto.commit": False,
     "session.timeout.ms": 6_000,
     'fetch.min.bytes': 20000,
-    'fetch.wait.max.ms': 500,
+    'fetch.wait.max.ms': 300,
 }
 
 single_message_conf = base_consumer_conf | {"group.id": "single"}
@@ -44,14 +44,61 @@ def consume_infinite_loop(consumer: Consumer) -> None:
                 print(f"Ошибка: {msg.error()}")
                 continue
 
-            key = msg.key().decode("utf-8")
-            value = msg.value().decode("utf-8")
+            key = msg.key().decode("utf-8") if msg.key() else None
+            value = msg.value().decode("utf-8") if msg.value() else None
             print(
                 f"Получено сообщение: {key=}, {value=}, offset={msg.offset()}"
             )
     except KafkaException as KE:
         raise KafkaError(KE)
     finally:
+        consumer.close()
+
+
+def consume_batch_loop(consumer: Consumer, batch_size: int = 10) -> None:
+    consumer.subscribe([TOPIC])
+    batch = []
+    try:
+        while True:
+            msg = consumer.poll(0.1)
+
+            if msg is None:
+                if batch:
+                    print(f"Обрабатываем остаток из {len(batch)} сообщений:")
+                    for m in batch:
+                        key = m.key().decode("utf-8") if m.key() else None
+                        value = m.value().decode("utf-8") if m.value() else None
+                        print(f"Обрабатываем: {key=}, {value=}, offset={m.offset()}")
+                    consumer.commit()
+                    batch.clear()
+                continue
+
+            if msg.error():
+                print(f"Ошибка: {msg.error()}")
+                continue
+
+            batch.append(msg)
+
+            if len(batch) >= batch_size:
+                print(f"Обрабатываем пачку из {batch_size} сообщений:")
+                for m in batch:
+                    key = m.key().decode("utf-8") if m.key() else None
+                    value = m.value().decode("utf-8") if m.value() else None
+                    print(f"Обрабатываем: {key=}, {value=}, offset={m.offset()}")
+                consumer.commit()
+                batch.clear()
+
+    except KafkaException as KE:
+        raise KafkaError(KE)
+    finally:
+        # При завершении обработать остаток
+        if batch:
+            print(f"Обрабатываем остаток из {len(batch)} сообщений:")
+            for m in batch:
+                key = m.key().decode("utf-8") if m.key() else None
+                value = m.value().decode("utf-8") if m.value() else None
+                print(f"Обрабатываем: {key=}, {value=}, offset={m.offset()}")
+            consumer.commit()
         consumer.close()
 
 
@@ -85,7 +132,7 @@ if __name__ == "__main__":
         daemon=True
     )
     batch_consumer_thread = Thread(
-        target=consume_infinite_loop,
+        target=consume_batch_loop,
         args=(batch_consumer,),
         daemon=True
     )

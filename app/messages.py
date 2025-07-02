@@ -43,13 +43,13 @@ def consume_infinite_loop(consumer: Consumer) -> None:
             if msg is None:
                 continue
             if msg.error():
-                print(f"Ошибка: {msg.error()}")
                 continue
 
             key = msg.key().decode("utf-8")
             value = msg.value().decode("utf-8")
             print(
-                f"Получено сообщение: {key=}, {value=}, offset={msg.offset()}"
+                f'Получено сообщение: {key=}, '
+                f'{value=}, offset={msg.offset()}'
             )
     except KafkaException as KE:
         raise KafkaError(KE)
@@ -62,16 +62,23 @@ def consume_batch_loop(consumer: Consumer, batch_size=10):
     batch = []
     while True:
         msg = consumer.poll(0.1)
+
         if msg is None:
-            if batch:
-                for m in batch:
-                    print(f"{m.key().decode()}: {m.value().decode()} (offset {m.offset()})")
-                consumer.commit()
-                batch.clear()
             continue
         if msg.error():
             continue
+
         batch.append(msg)
+
+        if len(batch) == batch_size:
+            for item in batch:
+                print(
+                    f'Получено сообщение: {item.key().decode("utf-8")}, '
+                    f'{msg.value().decode("utf-8")}, '
+                    f'offset={msg.value().decode("utf-8")}'
+                )
+            consumer.commit()
+            batch.clear()
 
 
 def create_message(incr_num: int) -> None:

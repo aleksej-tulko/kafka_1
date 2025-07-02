@@ -85,4 +85,6 @@ if __name__ == "__main__":
     single_message_consumer_thread.start()
     batch_consumer_thread.start()
     producer_thread.start()
-    print("End")
+
+    while True:
+        print("Выполняется программа")

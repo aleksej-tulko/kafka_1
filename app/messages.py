@@ -27,11 +27,15 @@ def create_message(incr_num: int) -> None:
     producer.close()
 
 
+def producer_thread():
+    Thread(target=create_message(incr_num=incr_num))
+
+
 incr_num = 0
 
 try:
     while True:
-        Thread(target=create_message(incr_num=incr_num))
+        producer_thread()
         incr_num += 1
 except Exception as ex:
     raise RuntimeError(ex)

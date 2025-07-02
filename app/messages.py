@@ -9,11 +9,23 @@ conf = {
     "192.168.1.129:9093,192.168.1.129:9095,192.168.1.129:9097",
 }
 
-base_consumer_conf = conf | {"auto.offset.reset": "earliest"}
+producer_conf = conf | {
+    "acks": "all",
+    "retries": 3,
+}
+
+base_consumer_conf = conf | {
+    "auto.offset.reset": "earliest",
+    "enable.auto.commit": True,
+    "session.timeout.ms": 6_000,
+    'fetch.min.bytes': 20000,
+    'fetch.wait.max.ms': 500,
+}
+
 single_message_conf = base_consumer_conf | {"group.id": "single"}
 batch_conf = base_consumer_conf | {"group.id": "batch"}
 
-producer = Producer(conf)
+producer = Producer(producer_conf)
 single_message_consumer = Consumer(single_message_conf)
 batch_consumer = Consumer(batch_conf)
 

@@ -45,8 +45,8 @@ def consume_infinite_loop(consumer: Consumer) -> None:
             if msg.error():
                 continue
 
-            key = msg.key().decode("utf-8")
-            value = msg.value().decode("utf-8")
+            key = msg.key().decode('utf-8')
+            value = msg.value().decode('utf-8')
             print(
                 f'Получено сообщение: {key=}, '
                 f'{value=}, offset={msg.offset()}'
@@ -54,31 +54,38 @@ def consume_infinite_loop(consumer: Consumer) -> None:
     except KafkaException as KE:
         raise KafkaError(KE)
     finally:
+        consumer.commit(asynchronous=False)
         consumer.close()
 
 
 def consume_batch_loop(consumer: Consumer, batch_size=10):
     consumer.subscribe([TOPIC])
     batch = []
-    while True:
-        msg = consumer.poll(0.1)
+    try:
+        while True:
+            msg = consumer.poll(0.1)
 
-        if msg is None:
-            continue
-        if msg.error():
-            continue
+            if msg is None:
+                continue
+            if msg.error():
+                continue
 
-        batch.append(msg)
+            batch.append(msg)
 
-        if len(batch) == batch_size:
-            for item in batch:
-                print(
-                    f'Получено сообщение в батч: {item.key().decode("utf-8")}, '
-                    f'{msg.value().decode("utf-8")}, '
-                    f'offset={msg.offset()}'
-                )
-            consumer.commit()
-            batch.clear()
+            if len(batch) == batch_size:
+                for item in batch:
+                    print(
+                        'Получено сообщение в батч: '
+                        f'{item.key().decode('utf-8')}, '
+                        f'{msg.value().decode('utf-8')}, '
+                        f'offset={msg.offset()}'
+                    )
+    except KafkaException as KE:
+        raise KafkaError(KE)
+    finally:
+        consumer.commit(asynchronous=False)
+        consumer.close()
+        batch.clear()
 
 
 def create_message(incr_num: int) -> None:
@@ -104,7 +111,7 @@ def producer_infinite_loop():
         producer.flush()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     single_message_consumer_thread = Thread(
         target=consume_infinite_loop,
         args=(single_message_consumer,),
@@ -125,5 +132,5 @@ if __name__ == "__main__":
     producer_thread.start()
 
     while True:
-        print("Выполняется программа")
+        print('Выполняется программа')
         sleep(10)

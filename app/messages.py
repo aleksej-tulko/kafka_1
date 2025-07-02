@@ -62,8 +62,8 @@ def producer_infinite_loop():
 
 
 if __name__ == "__main__":
-    t1 = Thread(target=consume_infinite_loop, args=(single_message_consumer), daemon=True)
-    t2 = Thread(target=consume_infinite_loop, args=(batch_consumer), daemon=True)
+    t1 = Thread(target=consume_infinite_loop, args=(single_message_consumer,), daemon=True)
+    t2 = Thread(target=consume_infinite_loop, args=(batch_consumer,), daemon=True)
     t1.start()
     t2.start()
 

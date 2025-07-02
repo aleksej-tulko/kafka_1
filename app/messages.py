@@ -70,14 +70,8 @@ def consume_batch_loop(consumer: Consumer, batch_size=10):
                 batch.clear()
             continue
         if msg.error():
-            print(f"Ошибка: {msg.error()}")
             continue
         batch.append(msg)
-        if len(batch) >= batch_size:
-            for m in batch:
-                print(f"{m.key().decode()}: {m.value().decode()} (offset {m.offset()})")
-            consumer.commit()
-            batch.clear()
 
 
 def create_message(incr_num: int) -> None:

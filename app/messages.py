@@ -71,9 +71,9 @@ TOPIC = 'pract-task'
 
 def delivery_report(err, msg):
     if err is not None:
-        print(f"Message delivery failed: {err}")
+        print(f'Сообщение не отправлено: {err}')
     else:
-        print(f"Message delivered to {msg.topic()} [{msg.partition()}]")
+        print(f'Сообщение доставлено в {msg.topic()} [{msg.partition()}]')
 
 
 def consume_infinite_loop(consumer: Consumer) -> None:
@@ -87,8 +87,8 @@ def consume_infinite_loop(consumer: Consumer) -> None:
             if msg.error():
                 continue
 
-            key = key_serializer('user-msg', SerializationContext(TOPIC, MessageField.VALUE))
-            value = value_serializer(message_value, SerializationContext(TOPIC, MessageField.VALUE),)
+            key = msg.key().decode('utf-8')
+            value = msg.value().decode('utf-8')
             print(
                 f'Получено сообщение: {key=}, '
                 f'{value=}, offset={msg.offset()}'
@@ -119,8 +119,8 @@ def consume_batch_loop(consumer: Consumer, batch_size=10):
                     print(
                         'Получено сообщение в батч: '
                         f'{item.key().decode('utf-8')}, '
-                        f'{msg.value().decode('utf-8')}, '
-                        f'offset={msg.offset()}'
+                        f'{item.value().decode('utf-8')}, '
+                        f'offset={item.offset()}'
                     )
                 batch.clear()
     except KafkaException as KE:

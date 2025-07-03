@@ -39,7 +39,7 @@ value_serializer = json_serializer
 
 conf = {
     "bootstrap.servers":
-    "localhost:9093,localhost:9095,localhost:9097",
+    "kafka_1:9092,kafka_:9094,kafka_3:9096",
 }
 
 producer_conf = conf | {

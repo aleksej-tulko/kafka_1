@@ -127,7 +127,7 @@ def consume_batch_loop(consumer: Consumer, batch_size=10):
 
 
 def create_message(incr_num: int) -> None:
-    message_value = {"id": incr_num, "name": "product-{incr_num}"}
+    message_value = {"id": incr_num, "name": f"product-{incr_num}"}
     producer.produce(
         topic=TOPIC,
         key=key_serializer(

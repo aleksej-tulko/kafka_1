@@ -9,3 +9,4 @@ RUN pip install -r requirements.txt --no-cache-dir
 COPY ../app/messages.py .
 
 CMD ["python3", "messages.py"]
+

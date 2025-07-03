@@ -139,7 +139,7 @@ def create_message(incr_num: int) -> None:
         value=value_serializer(
             message_value, SerializationContext(TOPIC, MessageField.VALUE)
         ),
-        on_deliver=delivery_report
+        on_delivery=delivery_report
     )
 
 

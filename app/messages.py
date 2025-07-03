@@ -1,8 +1,43 @@
 from time import sleep
 from threading import Thread
+
 from confluent_kafka import (
     Consumer, KafkaError, KafkaException, Producer
 )
+from confluent_kafka.schema_registry import SchemaRegistryClient
+from confluent_kafka.schema_registry.json_schema import JSONSerializer
+from confluent_kafka.serialization import (
+    MessageField, SerializationContext, StringSerializer
+)
+
+schema_registry_config = {
+   'url': 'http://localhost:8081'
+}
+
+json_schema_str = """
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Product",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "integer"
+        },
+        "name": {
+            "type": "string"
+        }
+    },
+    "required": ["id", "name"]
+}
+"""
+
+schema_registry_client = SchemaRegistryClient(schema_registry_config)
+json_serializer = JSONSerializer(json_schema_str, schema_registry_client)
+message_value = {"id": 1, "name": "product-{value}"}
+
+key_serializer = StringSerializer('utf_8')
+value_serializer = json_serializer
+
 
 conf = {
     "bootstrap.servers":
@@ -34,6 +69,13 @@ batch_consumer = Consumer(batch_conf)
 TOPIC = 'pract-task'
 
 
+def delivery_report(err, msg):
+    if err is not None:
+        print(f"Message delivery failed: {err}")
+    else:
+        print(f"Message delivered to {msg.topic()} [{msg.partition()}]")
+
+
 def consume_infinite_loop(consumer: Consumer) -> None:
     consumer.subscribe([TOPIC])
     try:
@@ -45,8 +87,8 @@ def consume_infinite_loop(consumer: Consumer) -> None:
             if msg.error():
                 continue
 
-            key = msg.key().decode('utf-8')
-            value = msg.value().decode('utf-8')
+            key = key_serializer('user-msg', SerializationContext(TOPIC, MessageField.VALUE))
+            value = value_serializer(message_value, SerializationContext(TOPIC, MessageField.VALUE),)
             print(
                 f'Получено сообщение: {key=}, '
                 f'{value=}, offset={msg.offset()}'
@@ -91,8 +133,13 @@ def consume_batch_loop(consumer: Consumer, batch_size=10):
 def create_message(incr_num: int) -> None:
     producer.produce(
         topic=TOPIC,
-        key=f'key-{incr_num}',
-        value=f'message-{incr_num}',
+        key=key_serializer(
+            "user_key", SerializationContext(TOPIC, MessageField.VALUE)
+        ),
+        value=value_serializer(
+            message_value, SerializationContext(TOPIC, MessageField.VALUE)
+        ),
+        on_deliver=delivery_report
     )
 
 

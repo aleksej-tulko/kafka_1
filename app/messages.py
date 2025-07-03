@@ -33,8 +33,6 @@ json_schema_str = """
 
 schema_registry_client = SchemaRegistryClient(schema_registry_config)
 json_serializer = JSONSerializer(json_schema_str, schema_registry_client)
-message_value = {"id": 1, "name": "product-{value}"}
-
 key_serializer = StringSerializer('utf_8')
 value_serializer = json_serializer
 
@@ -87,11 +85,9 @@ def consume_infinite_loop(consumer: Consumer) -> None:
             if msg.error():
                 continue
 
-            key = msg.key().decode('utf-8')
-            value = msg.value().decode('utf-8')
             print(
-                f'Получено сообщение: {key=}, '
-                f'{value=}, offset={msg.offset()}'
+                f'Получено сообщение: {msg.key().decode('utf-8')}, '
+                f'{msg.value().decode('utf-8')}, offset={msg.offset()}'
             )
     except KafkaException as KE:
         raise KafkaError(KE)
@@ -131,6 +127,7 @@ def consume_batch_loop(consumer: Consumer, batch_size=10):
 
 
 def create_message(incr_num: int) -> None:
+    message_value = {"id": incr_num, "name": "product-{incr_num}"}
     producer.produce(
         topic=TOPIC,
         key=key_serializer(

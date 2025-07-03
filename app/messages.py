@@ -39,7 +39,7 @@ value_serializer = json_serializer
 
 conf = {
     "bootstrap.servers":
-    "192.168.1.129:9093,192.168.1.129:9095,192.168.1.129:9097",
+    "localhost:9093,localhost:9095,localhost:9097",
 }
 
 producer_conf = conf | {

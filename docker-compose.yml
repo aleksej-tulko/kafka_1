@@ -102,6 +102,17 @@ services:
      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka_1:9092,kafka_2:9094,kafka_3:9096
      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
 
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    networks:
+     - kafka-network
+    depends_on:
+      - kafka_1
+      - kafka_2
+      - kafka_3
+
 networks:
   kafka-network:
     external: true

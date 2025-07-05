@@ -30,6 +30,12 @@ services:
       - "9093:9093"
     depends_on:
       - zookeeper
+    healthcheck:
+      test: ["CMD", "bash", "-c", "/usr/bin/kafka-topics --bootstrap-server localhost:9092 --list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
     restart: always
 
   kafka_2:
@@ -50,6 +56,12 @@ services:
       - "9095:9095"
     depends_on:
       - zookeeper
+    healthcheck:
+      test: ["CMD", "bash", "-c", "/usr/bin/kafka-topics --bootstrap-server localhost:9092 --list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
     restart: always
 
   kafka_3:
@@ -70,22 +82,28 @@ services:
       - "9097:9097"
     depends_on:
       - zookeeper
+    healthcheck:
+      test: ["CMD", "bash", "-c", "/usr/bin/kafka-topics --bootstrap-server localhost:9092 --list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
     restart: always
 
   schema-registry:
-   image: confluentinc/cp-schema-registry:latest
-   depends_on:
-     - kafka_1
-     - kafka_2
-     - kafka_3
-   ports:
-     - "8081:8081"
-   networks:
+    image: confluentinc/cp-schema-registry:latest
+    depends_on:
+      - kafka_1
+      - kafka_2
+      - kafka_3
+    ports:
+      - "8081:8081"
+    networks:
       - kafka-network
-   environment:
-     SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka_1:9092,PLAINTEXT://kafka_2:9094,PLAINTEXT://kafka_3:9096
-     SCHEMA_REGISTRY_HOST_NAME: schema-registry
-     SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka_1:9092,PLAINTEXT://kafka_2:9094,PLAINTEXT://kafka_3:9096
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
 
   kafka-ui:
    image: provectuslabs/kafka-ui

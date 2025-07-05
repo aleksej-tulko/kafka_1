@@ -12,7 +12,7 @@ services:
     networks:
       - kafka-network
     healthcheck:
-      test: ["CMD", "bash", "-c", "echo ruok | nc -w 2 localhost 2181 | grep imok"]
+      test: ["CMD", "bash", "-c", "zookeeper-shell localhost:2181 ls /"]
       interval: 10s
       timeout: 5s
       retries: 5

@@ -33,7 +33,7 @@ services:
     healthcheck:
       test: ["CMD", "bash", "-c", "/usr/bin/kafka-topics --bootstrap-server localhost:9092 --list"]
       interval: 30s
-      timeout: 10s
+      timeout: 60s
       retries: 3
       start_period: 20s
     restart: always
@@ -59,7 +59,7 @@ services:
     healthcheck:
       test: ["CMD", "bash", "-c", "/usr/bin/kafka-topics --bootstrap-server localhost:9094 --list"]
       interval: 30s
-      timeout: 10s
+      timeout: 60s
       retries: 3
       start_period: 20s
     restart: always
@@ -85,7 +85,7 @@ services:
     healthcheck:
       test: ["CMD", "bash", "-c", "/usr/bin/kafka-topics --bootstrap-server localhost:9096 --list"]
       interval: 30s
-      timeout: 10s
+      timeout: 60s
       retries: 3
       start_period: 20s
     restart: always
@@ -93,9 +93,12 @@ services:
   schema-registry:
     image: confluentinc/cp-schema-registry:latest
     depends_on:
-      - kafka_1
-      - kafka_2
-      - kafka_3
+      kafka_1:
+        condition: service_healthy
+      kafka_2:
+        condition: service_healthy
+      kafka_3:
+        condition: service_healthy
     ports:
       - "8081:8081"
     networks:
@@ -112,24 +115,22 @@ services:
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
 
   kafka-ui:
-   image: provectuslabs/kafka-ui
-   networks:
-     - kafka-network
-   depends_on:
-    schema-registry:
-      condition: service_healthy
-    kafka_1:
-      condition: service_healthy
-    kafka_2:
-      condition: service_healthy
-    kafka_3:
-      condition: service_healthy
-   ports:
-     - "8080:8080"
-   environment:
-     KAFKA_CLUSTERS_0_NAME: local
-     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka_1:9092,kafka_2:9094,kafka_3:9096
-     KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    image: provectuslabs/kafka-ui
+    networks:
+      - kafka-network
+    depends_on:
+      kafka_1:
+        condition: service_healthy
+      kafka_2:
+        condition: service_healthy
+      kafka_3:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka_1:9092,kafka_2:9094,kafka_3:9096
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
 
   app:
     build:
@@ -138,7 +139,14 @@ services:
     networks:
      - kafka-network
     depends_on:
-      - schema-registry
+      schema-registry:
+        condition: service_healthy
+      kafka_1:
+        condition: service_healthy
+      kafka_2:
+        condition: service_healthy
+      kafka_3:
+        condition: service_healthy
     deploy:
       mode: replicated
       replicas: 2

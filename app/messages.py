@@ -11,7 +11,7 @@ from confluent_kafka.serialization import (
 )
 
 schema_registry_config = {
-   'url': 'http://localhost:8081'
+   'url': 'http://schema-registry:8081'
 }
 
 json_schema_str = """

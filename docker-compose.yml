@@ -109,9 +109,7 @@ services:
     networks:
      - kafka-network
     depends_on:
-      - kafka_1
-      - kafka_2
-      - kafka_3
+      - schema-registry
     deploy:
       mode: replicated
       replicas: 2

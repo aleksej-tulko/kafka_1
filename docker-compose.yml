@@ -112,6 +112,9 @@ services:
       - kafka_1
       - kafka_2
       - kafka_3
+    deploy:
+      mode: replicated
+      replicas: 2
 
 networks:
   kafka-network:

@@ -64,7 +64,7 @@ producer = Producer(producer_conf)
 single_message_consumer = Consumer(single_message_conf)
 batch_consumer = Consumer(batch_conf)
 
-TOPIC = 'pract-task'
+TOPIC = 'pract-task1'
 
 
 def delivery_report(err, msg):

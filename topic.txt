@@ -1,0 +1,9 @@
+docker exec -it kafka_1-kafka_1-1 kafka-topics --describe --topic pract-task2 --bootstrap-server localhost:9092
+
+
+Topic: pract-task2	TopicId: DvXEVF0sREO5p5icpN9MXw	PartitionCount: 5	ReplicationFactor: 2	Configs: 
+	Topic: pract-task2	Partition: 0	Leader: 3	Replicas: 3,2	Isr: 2,3
+	Topic: pract-task2	Partition: 1	Leader: 1	Replicas: 1,3	Isr: 3,1
+	Topic: pract-task2	Partition: 2	Leader: 2	Replicas: 2,1	Isr: 2,1
+	Topic: pract-task2	Partition: 3	Leader: 3	Replicas: 3,1	Isr: 3,1
+	Topic: pract-task2	Partition: 4	Leader: 1	Replicas: 1,2	Isr: 2,1

@@ -53,7 +53,7 @@ value_serializer = json_serializer
 json_deserializer = JSONDeserializer(
     json_schema_str,
     schema_registry_client,
-    lambda obj, ctx: obj
+    None
 )
 
 

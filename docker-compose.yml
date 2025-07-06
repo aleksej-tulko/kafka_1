@@ -20,8 +20,6 @@ services:
 
   kafka_1:
     image: confluentinc/cp-kafka:7.0.10
-    env_file:
-      - .env
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -49,8 +47,6 @@ services:
 
   kafka_2:
     image: confluentinc/cp-kafka:7.0.10
-    env_file:
-      - .env
     environment:
       KAFKA_BROKER_ID: 2
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -78,8 +74,6 @@ services:
 
   kafka_3:
     image: confluentinc/cp-kafka:7.0.10
-    env_file:
-      - .env
     environment:
       KAFKA_BROKER_ID: 3
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181

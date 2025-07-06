@@ -50,7 +50,16 @@ schema_registry_client = SchemaRegistryClient(schema_registry_config)
 json_serializer = JSONSerializer(json_schema_str, schema_registry_client)
 key_serializer = StringSerializer('utf_8')
 value_serializer = json_serializer
-json_deserializer = JSONDeserializer(json_schema_str, schema_registry_client)
+
+
+def from_dict(d, ctx):
+    return d
+
+
+json_deserializer = JSONDeserializer(
+    json_schema_str,
+    schema_registry_client,
+    from_dict)
 
 
 conf = {

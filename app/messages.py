@@ -85,6 +85,17 @@ def delivery_report(err, msg):
         print(f'Сообщение доставлено в {msg.topic()} [{msg.partition()}]')
 
 
+def process_batch(batch: list) -> None:
+    for item in batch:
+        print(
+            'Получено сообщение в батч: '
+            f'{item.key().decode('utf-8')}, '
+            f'{item.value().decode('utf-8')}, '
+            f'offset={item.offset()}. '
+            f'Размер сообщения - {len(item.value())}'
+        )
+
+
 def consume_infinite_loop(consumer: Consumer) -> None:
     consumer.subscribe([TOPIC])
     try:
@@ -123,28 +134,14 @@ def consume_batch_loop(consumer: Consumer, batch_size=10):
             batch.append(msg)
 
             if len(batch) == batch_size:
-                for item in batch:
-                    print(
-                        'Получено сообщение в батч: '
-                        f'{item.key().decode('utf-8')}, '
-                        f'{item.value().decode('utf-8')}, '
-                        f'offset={item.offset()}. '
-                        f'Размер сообщения - {len(item.value())}'
-                    )
+                process_batch(batch=batch)
                 consumer.commit(asynchronous=False)
                 batch.clear()
     except KafkaException as KE:
         raise KafkaError(KE)
     finally:
         if batch:
-            for item in batch:
-                print(
-                    'Получено сообщение в батч: '
-                    f'{item.key().decode('utf-8')}, '
-                    f'{item.value().decode('utf-8')}, '
-                    f'offset={item.offset()}. '
-                    f'Размер сообщения - {len(item.value())}'
-                )
+            process_batch(batch=batch)
             consumer.commit(asynchronous=False)
             batch.clear()
         consumer.close()

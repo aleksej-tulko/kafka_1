@@ -51,7 +51,6 @@ json_serializer = JSONSerializer(json_schema_str, schema_registry_client)
 key_serializer = StringSerializer('utf_8')
 value_serializer = json_serializer
 
-
 json_deserializer = JSONDeserializer(
     json_schema_str,
     schema_registry_client)
@@ -111,9 +110,11 @@ def consume_infinite_loop(consumer: Consumer) -> None:
 
             if msg is None or msg.error():
                 continue
-            print(msg.value().decode('utf-8'))
+
+            value = msg.value().decode('utf-8')
+
             deserialized = json_deserializer(
-                msg.value(),
+                value,
                 SerializationContext(TOPIC, MessageField.VALUE)
             )
 
@@ -144,9 +145,11 @@ def consume_batch_loop(consumer: Consumer, batch_size=10):
 
             if msg is None or msg.error():
                 continue
-            print(msg.value().decode('utf-8'))
+
+            value = msg.value().decode('utf-8')
+
             deserialized = json_deserializer(
-                msg.value(),
+                value,
                 SerializationContext(TOPIC, MessageField.VALUE),
 
             )

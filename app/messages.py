@@ -109,10 +109,8 @@ def consume_infinite_loop(consumer: Consumer) -> None:
             if msg is None or msg.error():
                 continue
 
-            value = msg.value().decode('utf-8')
-
             deserialized = json_deserializer(
-                value,
+                msg.value(),
                 SerializationContext(TOPIC, MessageField.VALUE)
             )
 
@@ -144,10 +142,8 @@ def consume_batch_loop(consumer: Consumer, batch_size=10):
             if msg is None or msg.error():
                 continue
 
-            value = msg.value().decode('utf-8')
-
             deserialized = json_deserializer(
-                value,
+                msg.value(),
                 SerializationContext(TOPIC, MessageField.VALUE),
 
             )

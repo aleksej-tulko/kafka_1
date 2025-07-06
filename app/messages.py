@@ -14,10 +14,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-ENABLE_AUTOCOMMIT = os.getenv('ENABLE_AUTOCOMMIT ', False)
+ACKS_LEVEL = os.getenv('ACKS_LEVEL', 'all')
+AUTOCOMMIT_RESET = os.getenv('AUTOCOMMIT_RESET', 'earliest')
+ENABLE_AUTOCOMMIT = os.getenv('ENABLE_AUTOCOMMIT', False)
 FETCH_MIN_BYTES = os.getenv('FETCH_MIN_BYTES', 1)
 FETCH_WAIT_MAX_MS = os.getenv('FETCH_WAIT_MAX_MS', 100)
 RETRIES = os.getenv('RETRIES', '3')
+SESSION_TIME_MS = os.getenv('SESSION_TIME_MS', 1_000)
 TOPIC = os.getenv('TOPIC', 'practice')
 
 schema_registry_config = {
@@ -53,14 +56,14 @@ conf = {
 }
 
 producer_conf = conf | {
-    "acks": "all",
+    "acks": ACKS_LEVEL,
     "retries": RETRIES,
 }
 
 base_consumer_conf = conf | {
-    "auto.offset.reset": "earliest",
+    "auto.offset.reset": AUTOCOMMIT_RESET,
     "enable.auto.commit": ENABLE_AUTOCOMMIT,
-    "session.timeout.ms": 6_000
+    "session.timeout.ms": SESSION_TIME_MS
 }
 
 single_message_conf = base_consumer_conf | {"group.id": "single"}
@@ -95,7 +98,8 @@ def consume_infinite_loop(consumer: Consumer) -> None:
 
             print(
                 f'Получено сообщение: {msg.key().decode('utf-8')}, '
-                f'{msg.value().decode('utf-8')}, offset={msg.offset()}'
+                f'{msg.value().decode('utf-8')}, offset={msg.offset()}. '
+                f'Размер сообщения - {len(msg.value())}'
             )
     except KafkaException as KE:
         raise KafkaError(KE)
@@ -124,7 +128,8 @@ def consume_batch_loop(consumer: Consumer, batch_size=10):
                         'Получено сообщение в батч: '
                         f'{item.key().decode('utf-8')}, '
                         f'{item.value().decode('utf-8')}, '
-                        f'offset={item.offset()}'
+                        f'offset={item.offset()}. '
+                        f'Размер сообщения - {len(item.value())}'
                     )
                 batch.clear()
     except KafkaException as KE:

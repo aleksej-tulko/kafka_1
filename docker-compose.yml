@@ -26,7 +26,7 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,EXTERNAL://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka_1:9092,EXTERNAL://${KAFKA_ADV_LISTENER_ADDR}:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka_1:9092,EXTERNAL://localhost:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     volumes:
@@ -40,7 +40,7 @@ services:
       zookeeper:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "bash", "-c", "/usr/bin/kafka-topics --bootstrap-server ${KAFKA_ADV_LISTENER_ADDR}:9092 --list"]
+      test: ["CMD", "bash", "-c", "/usr/bin/kafka-topics --bootstrap-server localhost:9092 --list"]
       interval: 30s
       timeout: 60s
       retries: 3
@@ -55,7 +55,7 @@ services:
       KAFKA_BROKER_ID: 2
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9094,EXTERNAL://0.0.0.0:9095
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka_2:9094,EXTERNAL://${KAFKA_ADV_LISTENER_ADDR}:9095
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka_2:9094,EXTERNAL://localhost:9095
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     volumes:
@@ -69,7 +69,7 @@ services:
       zookeeper:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "bash", "-c", "/usr/bin/kafka-topics --bootstrap-server ${KAFKA_ADV_LISTENER_ADDR}:9094 --list"]
+      test: ["CMD", "bash", "-c", "/usr/bin/kafka-topics --bootstrap-server localhost:9094 --list"]
       interval: 30s
       timeout: 60s
       retries: 3
@@ -84,7 +84,7 @@ services:
       KAFKA_BROKER_ID: 3
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9096,EXTERNAL://0.0.0.0:9097
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka_3:9096,EXTERNAL://${KAFKA_ADV_LISTENER_ADDR}:9097
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka_3:9096,EXTERNAL://localhost:9097
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     volumes:
@@ -98,7 +98,7 @@ services:
       zookeeper:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "bash", "-c", "/usr/bin/kafka-topics --bootstrap-server ${KAFKA_ADV_LISTENER_ADDR}:9096 --list"]
+      test: ["CMD", "bash", "-c", "/usr/bin/kafka-topics --bootstrap-server localhost:9096 --list"]
       interval: 30s
       timeout: 60s
       retries: 3

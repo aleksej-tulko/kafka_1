@@ -131,11 +131,22 @@ def consume_batch_loop(consumer: Consumer, batch_size=10):
                         f'offset={item.offset()}. '
                         f'Размер сообщения - {len(item.value())}'
                     )
+                consumer.commit(asynchronous=False)
                 batch.clear()
     except KafkaException as KE:
         raise KafkaError(KE)
     finally:
-        consumer.commit(asynchronous=False)
+        if batch:
+            for item in batch:
+                print(
+                    'Получено сообщение в батч: '
+                    f'{item.key().decode('utf-8')}, '
+                    f'{item.value().decode('utf-8')}, '
+                    f'offset={item.offset()}. '
+                    f'Размер сообщения - {len(item.value())}'
+                )
+            consumer.commit(asynchronous=False)
+            batch.clear()
         consumer.close()
 
 

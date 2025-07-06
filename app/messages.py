@@ -59,7 +59,7 @@ def from_dict(obj: dict, ctx: SerializationContext) -> dict:
 json_deserializer = JSONDeserializer(
     json_schema_str,
     schema_registry_client,
-    from_dict)
+    from_dict=from_dict)
 
 
 conf = {

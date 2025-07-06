@@ -51,9 +51,7 @@ json_serializer = JSONSerializer(json_schema_str, schema_registry_client)
 key_serializer = StringSerializer('utf_8')
 value_serializer = json_serializer
 
-json_deserializer = JSONDeserializer(
-    json_schema_str,
-    schema_registry_client)
+json_deserializer = JSONDeserializer(scheme_str=json_schema_str)
 
 
 conf = {

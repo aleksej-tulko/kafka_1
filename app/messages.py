@@ -1,3 +1,4 @@
+import os
 from time import sleep
 from threading import Thread
 
@@ -9,6 +10,15 @@ from confluent_kafka.schema_registry.json_schema import JSONSerializer
 from confluent_kafka.serialization import (
     MessageField, SerializationContext, StringSerializer
 )
+from dotenv import load_dotenv
+
+load_dotenv()
+
+ENABLE_AUTOCOMMIT = os.getenv('ENABLE_AUTOCOMMIT ', False)
+FETCH_MIN_BYTES = os.getenv('FETCH_MIN_BYTES', 1)
+FETCH_WAIT_MAX_MS = os.getenv('FETCH_WAIT_MAX_MS', 100)
+RETRIES = os.getenv('RETRIES', '3')
+TOPIC = os.getenv('TOPIC', 'practice')
 
 schema_registry_config = {
    'url': 'http://schema-registry:8081'
@@ -44,27 +54,25 @@ conf = {
 
 producer_conf = conf | {
     "acks": "all",
-    "retries": 3,
+    "retries": RETRIES,
 }
 
 base_consumer_conf = conf | {
     "auto.offset.reset": "earliest",
-    "enable.auto.commit": False,
+    "enable.auto.commit": ENABLE_AUTOCOMMIT,
     "session.timeout.ms": 6_000
 }
 
 single_message_conf = base_consumer_conf | {"group.id": "single"}
 batch_conf = base_consumer_conf | {
     "group.id": "batch",
-    "fetch.min.bytes": 1,
-    "fetch.wait.max.ms": 100,
+    "fetch.min.bytes": FETCH_MIN_BYTES,
+    "fetch.wait.max.ms": FETCH_WAIT_MAX_MS,
 }
 
 producer = Producer(producer_conf)
 single_message_consumer = Consumer(single_message_conf)
 batch_consumer = Consumer(batch_conf)
-
-TOPIC = 'pract-task1'
 
 
 def delivery_report(err, msg):

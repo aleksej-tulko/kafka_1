@@ -6,7 +6,9 @@ from confluent_kafka import (
     Consumer, KafkaError, KafkaException, Producer
 )
 from confluent_kafka.schema_registry import SchemaRegistryClient
-from confluent_kafka.schema_registry.json_schema import JSONSerializer
+from confluent_kafka.schema_registry.json_schema import (
+    JSONDeserializer, JSONSerializer
+)
 from confluent_kafka.serialization import (
     MessageField, SerializationContext, StringSerializer
 )
@@ -48,6 +50,7 @@ schema_registry_client = SchemaRegistryClient(schema_registry_config)
 json_serializer = JSONSerializer(json_schema_str, schema_registry_client)
 key_serializer = StringSerializer('utf_8')
 value_serializer = json_serializer
+json_deserializer = JSONDeserializer(json_schema_str, schema_registry_client)
 
 
 conf = {
@@ -92,7 +95,7 @@ def process_batch(batch: list) -> None:
             f'{item.key().decode('utf-8')}, '
             f'{item.value().decode('utf-8')}, '
             f'offset={item.offset()}. '
-            f'Размер сообщения - {len(item.value())}'
+            f'Размер сообщения - {len(item.value())} байтов.'
         )
 
 
@@ -102,20 +105,29 @@ def consume_infinite_loop(consumer: Consumer) -> None:
         while True:
             msg = consumer.poll(0.1)
 
-            if msg is None:
-                continue
-            if msg.error():
+            if msg is None or msg.error():
                 continue
 
-            print(
-                f'Получено сообщение: {msg.key().decode('utf-8')}, '
-                f'{msg.value().decode('utf-8')}, offset={msg.offset()}. '
-                f'Размер сообщения - {len(msg.value())}'
+            deserialized = json_deserializer(
+                msg.value(),
+                SerializationContext(TOPIC, MessageField.VALUE)
             )
+
+            if isinstance(deserialized, dict) and (
+                all(field in ('id', 'name') for field in deserialized.keys())
+            ):
+                consumer.commit(asynchronous=False)
+
+                print(
+                    f'Получено сообщение: {msg.key().decode('utf-8')}, '
+                    f'{deserialized}, offset={msg.offset()}. '
+                    f'Размер сообщения - {len(msg.value())} байтов.'
+                )
+            else:
+                print('Ошибка десериализации.')
     except KafkaException as KE:
         raise KafkaError(KE)
     finally:
-        consumer.commit(asynchronous=False)
         consumer.close()
 
 
@@ -126,12 +138,20 @@ def consume_batch_loop(consumer: Consumer, batch_size=10):
         while True:
             msg = consumer.poll(0.1)
 
-            if msg is None:
-                continue
-            if msg.error():
+            if msg is None or msg.error():
                 continue
 
-            batch.append(msg)
+            deserialized = json_deserializer(
+                msg.value(),
+                SerializationContext(TOPIC, MessageField.VALUE)
+            )
+
+            if isinstance(deserialized, dict) and (
+                all(field in ('id', 'name') for field in deserialized.keys())
+            ):
+                batch.append(msg)
+            else:
+                print('Ошибка десериализации.')
 
             if len(batch) == batch_size:
                 process_batch(batch=batch)

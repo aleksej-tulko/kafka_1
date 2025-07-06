@@ -52,8 +52,8 @@ key_serializer = StringSerializer('utf_8')
 value_serializer = json_serializer
 
 
-def from_dict(d, ctx):
-    return d
+def from_dict(obj: dict, ctx: SerializationContext) -> dict:
+    return obj
 
 
 json_deserializer = JSONDeserializer(

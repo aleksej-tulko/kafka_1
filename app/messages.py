@@ -53,7 +53,7 @@ value_serializer = json_serializer
 json_deserializer = JSONDeserializer(
     json_schema_str,
     schema_registry_client,
-    from_dict=lambda obj, ctx: obj
+    lambda obj, ctx: obj
 )
 
 

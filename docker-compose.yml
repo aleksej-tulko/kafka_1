@@ -139,6 +139,7 @@ services:
     environment:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka_1:9092,kafka_2:9094,kafka_3:9096
+      KAFKA_CLUSTERS_0_KSQLDBSERVER: http://ksqldb-server:8088
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
 
   app:

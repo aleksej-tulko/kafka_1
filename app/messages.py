@@ -134,7 +134,7 @@ def create_message(sender_id: int, sender_name: str,
     producer.produce(
         topic=TOPIC,
         key="pract",
-        value=message_value,
+        value=json.dumps(message_value).encode('utf-8'),
         on_delivery=delivery_report
     )
 

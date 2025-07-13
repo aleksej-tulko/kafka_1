@@ -225,7 +225,7 @@ def create_message(sender_id: int, sender_name: str,
     producer.produce(
         topic=TOPIC,
         key=key_serializer(
-            "user_key", SerializationContext(TOPIC, MessageField.VALUE)
+            "user_key", SerializationContext(TOPIC, MessageField.KEY)
         ),
         value=value_serializer(
             message_value, SerializationContext(TOPIC, MessageField.VALUE)

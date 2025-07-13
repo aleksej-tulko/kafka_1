@@ -96,14 +96,16 @@ def consume_infinite_loop(consumer: Consumer) -> None:
             if msg is None or msg.error():
                 continue
 
-            if isinstance(msg, dict) and (
-                all(field in mandatory_message_fields for field in msg.keys())
+            value = msg.value().decode('utf-8')
+
+            if isinstance(value, dict) and (
+                all(field in mandatory_message_fields for field in value)
             ):
                 consumer.commit(asynchronous=False)
 
                 print(
                     f'Получено сообщение: {msg.key().decode('utf-8')}, '
-                    f'{msg.value().decode('utf-8')}, offset={msg.offset()}. '
+                    f'{value}, offset={msg.offset()}. '
                     f'Размер сообщения - {len(msg.value())} байтов.'
                 )
             else:

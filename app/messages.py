@@ -103,11 +103,11 @@ def consume_infinite_loop(consumer: Consumer) -> None:
 
                 print(
                     f'Получено сообщение: {msg.key().decode('utf-8')}, '
-                    f'{msg.value()}, offset={msg.offset()}. '
+                    f'{msg.value().decode('utf-8')}, offset={msg.offset()}. '
                     f'Размер сообщения - {len(msg.value())} байтов.'
                 )
             else:
-                print(msg)
+                print(msg.keys())
                 print('Ошибка десериализации.')
     except KafkaException as KE:
         raise KafkaError(KE)

@@ -1,4 +1,6 @@
 import os
+from random import choice, choices
+import string
 from time import sleep
 from threading import Thread
 
@@ -24,6 +26,13 @@ FETCH_WAIT_MAX_MS = os.getenv('FETCH_WAIT_MAX_MS', 100)
 RETRIES = os.getenv('RETRIES', '3')
 SESSION_TIME_MS = os.getenv('SESSION_TIME_MS', 1_000)
 TOPIC = os.getenv('TOPIC', 'practice')
+FORBIDDEN_WORDS = ["spam", "skam", "windows"]
+
+user_ids = {
+    "clown": 1,
+    "spammer": 2,
+    "dodik": 3
+}
 
 schema_registry_config = {
    'url': 'http://schema-registry:8081'
@@ -35,14 +44,27 @@ json_schema_str = """
     "title": "Product",
     "type": "object",
     "properties": {
-        "id": {
+        "sender_id": {
             "type": "integer"
         },
-        "name": {
+        "sender_name": {
+            "type": "string"
+        },
+        "recipient_id": {
+            "type": "integer"
+        },
+        "recipient_name": {
+            "type": "string"
+        },
+        "amount": {
+            "type": "number"
+        },
+        "content": {
             "type": "string"
         }
     },
-    "required": ["id", "name"]
+    "required": ["sender_id", "sender_name",\
+        "recipient_id", "recipient_name", "amount", "content"]
 }
 """
 
@@ -179,9 +201,19 @@ def consume_batch_loop(consumer: Consumer, batch_size=10):
         consumer.close()
 
 
-def create_message(incr_num: int) -> None:
+def create_message(sender_id: int, sender_name: str,
+                   recipient_id: int, recipient_name: str,
+                   amount: float, content: str
+                   ) -> None:
     """Сериализация сообщения и отправка в брокер."""
-    message_value = {"id": incr_num, "name": f"product-{incr_num}"}
+    message_value = {
+        "sender_id": sender_id,
+        "sender_name": sender_name,
+        "recipient_id": recipient_id,
+        "recipient_name": recipient_name,
+        "amount": amount,
+        "content": content
+        }
     producer.produce(
         topic=TOPIC,
         key=key_serializer(
@@ -196,17 +228,36 @@ def create_message(incr_num: int) -> None:
 
 def producer_infinite_loop():
     """Запуска цикла для генерации сообщения."""
-    incr_num = 0
+    incr_num: float = 0.0
+    user_names = list(user_ids)
     try:
         while True:
-            create_message(incr_num)
-            incr_num += 1
-            if incr_num % 10 == 0:
-                producer.flush()
-    except Exception as e:
-        raise RuntimeError(e)
+            for sender_name, id in user_ids.items():
+                recipients = [name for name in user_names
+                              if name != sender_name]
+                for recipient_name in recipients:
+                    content = (
+                        choice(FORBIDDEN_WORDS) if incr_num % 10 == 0
+                        else ''.join(
+                            choices(
+                                string.ascii_uppercase + string.digits, k=5)
+                        )
+                    )
+                    create_message(
+                        sender_id=id,
+                        sender_name=sender_name,
+                        recipient_id=user_ids[recipient_name],
+                        recipient_name=recipient_name,
+                        amount=incr_num,
+                        content=content)
+                    incr_num += 1.0
+                    if incr_num % 10 == 0:
+                        producer.flush()
+    except (KafkaException, Exception) as e:
+        raise KafkaError(e)
     finally:
         producer.flush()
+
 
 
 if __name__ == '__main__':

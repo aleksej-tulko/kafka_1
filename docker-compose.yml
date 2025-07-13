@@ -162,9 +162,9 @@ services:
         condition: service_healthy
       kafka_3:
         condition: service_healthy
-    deploy:
-      mode: replicated
-      replicas: 2
+    # deploy:
+    #   mode: replicated
+    #   replicas: 1
     restart: always
 
   # ksqldb-server:

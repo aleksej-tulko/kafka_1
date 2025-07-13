@@ -162,6 +162,7 @@ def consume_infinite_loop(consumer: Consumer) -> None:
                     f'Размер сообщения - {len(msg.value())} байтов.'
                 )
             else:
+                print(msg)
                 print('Ошибка десериализации.')
     except KafkaException as KE:
         raise KafkaError(KE)
@@ -191,6 +192,7 @@ def consume_batch_loop(consumer: Consumer, batch_size=10):
             ):  # Валидация ответа
                 batch.append(msg)  # Сохранение в батч
             else:
+                print(msg)
                 print('Ошибка десериализации.')
 
             if len(batch) == batch_size:  # Если в батче накопления № сообщений,

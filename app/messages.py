@@ -38,6 +38,12 @@ schema_registry_config = {
    'url': 'http://schema-registry:8081'
 }
 
+mandatory_message_fields = [
+    "sender_id", "sender_name",
+    "recipient_id", "recipient_name",
+    "amount", "content"
+]
+
 json_schema_str = """
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -146,7 +152,7 @@ def consume_infinite_loop(consumer: Consumer) -> None:
             )
 
             if isinstance(deserialized, dict) and (
-                all(field in ('id', 'name') for field in deserialized.keys())
+                all(field in mandatory_message_fields for field in deserialized.keys())
             ):  # Валидация ответа
                 consumer.commit(asynchronous=False)
 
@@ -181,7 +187,7 @@ def consume_batch_loop(consumer: Consumer, batch_size=10):
             )
 
             if isinstance(deserialized, dict) and (
-                all(field in ('id', 'name') for field in deserialized.keys())
+                all(field in mandatory_message_fields for field in deserialized.keys())
             ):  # Валидация ответа
                 batch.append(msg)  # Сохранение в батч
             else:

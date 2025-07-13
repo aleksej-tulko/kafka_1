@@ -111,7 +111,7 @@ def consume_infinite_loop(consumer: Consumer) -> None:
                 )
             else:
                 print(type(value))
-                print('Ошибка десериализации.')
+                print('Ошибка.')
     except KafkaException as KE:
         raise KafkaError(KE)
     finally:

@@ -100,30 +100,30 @@ services:
       start_period: 20s
     restart: always
 
-  schema-registry:
-    image: confluentinc/cp-schema-registry:latest
-    depends_on:
-      kafka_1:
-        condition: service_healthy
-      kafka_2:
-        condition: service_healthy
-      kafka_3:
-        condition: service_healthy
-    ports:
-      - "8081:8081"
-    networks:
-      - kafka-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/subjects"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-    environment:
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka_1:9092,PLAINTEXT://kafka_2:9094,PLAINTEXT://kafka_3:9096
-      SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
-    restart: always
+  # schema-registry:
+  #   image: confluentinc/cp-schema-registry:latest
+  #   depends_on:
+  #     kafka_1:
+  #       condition: service_healthy
+  #     kafka_2:
+  #       condition: service_healthy
+  #     kafka_3:
+  #       condition: service_healthy
+  #   ports:
+  #     - "8081:8081"
+  #   networks:
+  #     - kafka-network
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8081/subjects"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 20s
+  #   environment:
+  #     SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka_1:9092,PLAINTEXT://kafka_2:9094,PLAINTEXT://kafka_3:9096
+  #     SCHEMA_REGISTRY_HOST_NAME: schema-registry
+  #     SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+  #   restart: always
 
   kafka-ui:
     image: provectuslabs/kafka-ui
@@ -154,8 +154,6 @@ services:
     networks:
      - kafka-network
     depends_on:
-      schema-registry:
-        condition: service_healthy
       kafka_1:
         condition: service_healthy
       kafka_2:

@@ -7,13 +7,6 @@ from threading import Thread
 from confluent_kafka import (
     Consumer, KafkaError, KafkaException, Producer
 )
-from confluent_kafka.schema_registry import SchemaRegistryClient
-from confluent_kafka.schema_registry.json_schema import (
-    JSONDeserializer, JSONSerializer
-)
-from confluent_kafka.serialization import (
-    MessageField, SerializationContext, StringSerializer
-)
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -44,71 +37,28 @@ mandatory_message_fields = [
     "amount", "content"
 ]
 
-json_schema_str = """
-{
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Product",
-    "type": "object",
-    "properties": {
-        "sender_id": {
-            "type": "integer"
-        },
-        "sender_name": {
-            "type": "string"
-        },
-        "recipient_id": {
-            "type": "integer"
-        },
-        "recipient_name": {
-            "type": "string"
-        },
-        "amount": {
-            "type": "number"
-        },
-        "content": {
-            "type": "string"
-        }
-    },
-    "required": ["sender_id", "sender_name",\
-        "recipient_id", "recipient_name", "amount", "content"]
-}
-"""
-
-schema_registry_client = SchemaRegistryClient(schema_registry_config)
-json_serializer = JSONSerializer(json_schema_str, schema_registry_client)
-key_serializer = StringSerializer('utf_8')
-value_serializer = json_serializer
-
-json_deserializer = JSONDeserializer(json_schema_str)
-
-
-# Базовый конфиг для продюсера и консюмеров.
 conf = {
     "bootstrap.servers":
     "kafka_1:9092,kafka_2:9094,kafka_3:9096",
 }
 
-# Конфиг продюсера.
 producer_conf = conf | {
-    "acks": ACKS_LEVEL,  # Подтверждение отправки
-    "retries": RETRIES,  # Кол-ва ретраев для отправки сообщения
+    "acks": ACKS_LEVEL,
+    "retries": RETRIES,
 }
 
-# Конфиг консюмеров.
 base_consumer_conf = conf | {
-    "auto.offset.reset": AUTOOFF_RESET,  # Начало чтения журнала, если офсет не найден.
-    "enable.auto.commit": ENABLE_AUTOCOMMIT,  # Разрешение кафке коммитить офсеты
-    "session.timeout.ms": SESSION_TIME_MS  # Время, через которое консумер считается недоступным
+    "auto.offset.reset": AUTOOFF_RESET,
+    "enable.auto.commit": ENABLE_AUTOCOMMIT,
+    "session.timeout.ms": SESSION_TIME_MS
 }
 
-# Конфиг консюмера, который сразу коммитит
 single_message_conf = base_consumer_conf | {"group.id": "single"}
 
-# Конфиг консюмера, который собирает батч перед коммитом
 batch_conf = base_consumer_conf | {
     "group.id": "batch",
-    "fetch.min.bytes": FETCH_MIN_BYTES,  # минимальный объём данных в байтах, который брокер должен накопить перед отправкой потребителю
-    "fetch.wait.max.ms": FETCH_WAIT_MAX_MS,  # время в милисекундахз для накопления сообщений перед коммитом
+    "fetch.min.bytes": FETCH_MIN_BYTES,
+    "fetch.wait.max.ms": FETCH_WAIT_MAX_MS,
 }
 
 producer = Producer(producer_conf)
@@ -146,19 +96,14 @@ def consume_infinite_loop(consumer: Consumer) -> None:
             if msg is None or msg.error():
                 continue
 
-            deserialized = json_deserializer(  # Десериализация
-                msg.value(),
-                SerializationContext(TOPIC, MessageField.VALUE)
-            )
-
-            if isinstance(deserialized, dict) and (
-                all(field in mandatory_message_fields for field in deserialized.keys())
-            ):  # Валидация ответа
+            if isinstance(msg, dict) and (
+                all(field in mandatory_message_fields for field in msg.keys())
+            ):
                 consumer.commit(asynchronous=False)
 
                 print(
                     f'Получено сообщение: {msg.key().decode('utf-8')}, '
-                    f'{deserialized}, offset={msg.offset()}. '
+                    f'{msg.value()}, offset={msg.offset()}. '
                     f'Размер сообщения - {len(msg.value())} байтов.'
                 )
             else:
@@ -167,45 +112,6 @@ def consume_infinite_loop(consumer: Consumer) -> None:
     except KafkaException as KE:
         raise KafkaError(KE)
     finally:
-        consumer.close()
-
-
-def consume_batch_loop(consumer: Consumer, batch_size=10):
-    """Получения сообщений батчем."""
-    consumer.subscribe([TOPIC])
-    batch = []
-    try:
-        while True:
-            msg = consumer.poll(0.1)
-
-            if msg is None or msg.error():
-                continue
-
-            deserialized = json_deserializer(  # Десериализация
-                msg.value(),
-                SerializationContext(TOPIC, MessageField.VALUE),
-
-            )
-
-            if isinstance(deserialized, dict) and (
-                all(field in mandatory_message_fields for field in deserialized.keys())
-            ):  # Валидация ответа
-                batch.append(msg)  # Сохранение в батч
-            else:
-                print(msg)
-                print('Ошибка десериализации.')
-
-            if len(batch) == batch_size:  # Если в батче накопления № сообщений,
-                process_batch(batch=batch)  
-                consumer.commit(asynchronous=False)  # коммитится офсет
-                batch.clear()  # и бачт чистится для новый сообщений
-    except KafkaException as KE:
-        raise KafkaError(KE)
-    finally:  # В случае прерыванния цикла, в этом блоке коммитится все имеющиеся в батче сообщения
-        if batch:
-            process_batch(batch=batch)
-            consumer.commit(asynchronous=False)
-            batch.clear()
         consumer.close()
 
 
@@ -224,12 +130,8 @@ def create_message(sender_id: int, sender_name: str,
         }
     producer.produce(
         topic=TOPIC,
-        key=key_serializer(
-            "user_key", SerializationContext(TOPIC, MessageField.KEY)
-        ),
-        value=value_serializer(
-            message_value, SerializationContext(TOPIC, MessageField.VALUE)
-        ),
+        key="pract",
+        value=message_value,
         on_delivery=delivery_report
     )
 
@@ -267,17 +169,11 @@ def producer_infinite_loop():
         producer.flush()
 
 
-
 if __name__ == '__main__':
     """Основной код."""
     single_message_consumer_thread = Thread(
         target=consume_infinite_loop,
         args=(single_message_consumer,),
-        daemon=True
-    )
-    batch_consumer_thread = Thread(
-        target=consume_batch_loop,
-        args=(batch_consumer,),
         daemon=True
     )
     producer_thread = Thread(
@@ -286,7 +182,6 @@ if __name__ == '__main__':
         daemon=True
     )
     single_message_consumer_thread.start()
-    batch_consumer_thread.start()
     producer_thread.start()
 
     while True:

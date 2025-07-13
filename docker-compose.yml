@@ -17,6 +17,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+    restart: always
 
   kafka_1:
     image: confluentinc/cp-kafka:7.0.10
@@ -122,6 +123,7 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka_1:9092,PLAINTEXT://kafka_2:9094,PLAINTEXT://kafka_3:9096
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+    restart: always
 
   kafka-ui:
     image: provectuslabs/kafka-ui
@@ -141,6 +143,7 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka_1:9092,kafka_2:9094,kafka_3:9096
       KAFKA_CLUSTERS_0_KSQLDBSERVER: http://ksqldb-server:8088
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    restart: always
 
   app:
     build:
@@ -162,6 +165,7 @@ services:
     deploy:
       mode: replicated
       replicas: 2
+    restart: always
 
   ksqldb-server:
     image: confluentinc/ksqldb-server:latest
@@ -178,6 +182,7 @@ services:
       - "8088:8088"
     networks:
       - kafka-network
+    restart: always
 
   ksqldb-cli:
     image: confluentinc/ksqldb-cli:latest
@@ -188,6 +193,7 @@ services:
     tty: true
     networks:
       - kafka-network
+    restart: always
 
 networks:
   kafka-network:

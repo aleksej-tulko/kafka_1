@@ -96,7 +96,7 @@ def consume_infinite_loop(consumer: Consumer) -> None:
 
             if msg is None or msg.error():
                 continue
-            
+
             value = json.loads(msg.value().decode('utf-8'))
             if isinstance(value, dict) and (
                 all(field in mandatory_message_fields
@@ -110,7 +110,7 @@ def consume_infinite_loop(consumer: Consumer) -> None:
                     f'Размер сообщения - {len(msg.value())} байтов.'
                 )
             else:
-                print(value)
+                print(type(value))
                 print('Ошибка десериализации.')
     except KafkaException as KE:
         raise KafkaError(KE)

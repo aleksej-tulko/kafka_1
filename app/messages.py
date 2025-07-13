@@ -98,7 +98,8 @@ def consume_infinite_loop(consumer: Consumer) -> None:
 
             value = msg.value().decode('utf-8')
             if isinstance(value, dict) and (
-                all(field in mandatory_message_fields for field in value)
+                all(field in mandatory_message_fields
+                    for field in value.keys())
             ):
                 consumer.commit(asynchronous=False)
 

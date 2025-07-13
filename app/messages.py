@@ -1,3 +1,4 @@
+import json
 import os
 from random import choice, choices
 import string
@@ -95,8 +96,8 @@ def consume_infinite_loop(consumer: Consumer) -> None:
 
             if msg is None or msg.error():
                 continue
-
-            value = msg.value().decode('utf-8')
+            
+            value = json.loads(msg.value().decode('utf-8'))
             if isinstance(value, dict) and (
                 all(field in mandatory_message_fields
                     for field in value.keys())

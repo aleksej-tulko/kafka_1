@@ -26,7 +26,7 @@ user_ids = {
     "clown": 1,
     "spammer": 2,
     "dodik": 3,
-    "payso": 4
+    "payaso": 4
 }
 
 schema_registry_config = {

@@ -25,7 +25,8 @@ FORBIDDEN_WORDS = ["spam", "skam", "windows"]
 user_ids = {
     "clown": 1,
     "spammer": 2,
-    "dodik": 3
+    "dodik": 3,
+    "payso": 4
 }
 
 schema_registry_config = {
@@ -110,7 +111,6 @@ def consume_infinite_loop(consumer: Consumer) -> None:
                     f'Размер сообщения - {len(msg.value())} байтов.'
                 )
             else:
-                print(type(value))
                 print('Ошибка.')
     except KafkaException as KE:
         raise KafkaError(KE)

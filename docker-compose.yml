@@ -165,33 +165,33 @@ services:
     #   replicas: 1
     restart: always
 
-  ksqldb-server:
-    image: confluentinc/ksqldb-server:latest
-    depends_on:
-      kafka_1:
-        condition: service_healthy
-      kafka_2:
-        condition: service_healthy
-      kafka_3:
-        condition: service_healthy
-    environment:
-      KSQL_BOOTSTRAP_SERVERS: kafka_1:9092,kafka_2:9094,kafka_3:9096
-    ports:
-      - "8088:8088"
-    networks:
-      - kafka-network
-    restart: always
+  # ksqldb-server:
+  #   image: confluentinc/ksqldb-server:latest
+  #   depends_on:
+  #     kafka_1:
+  #       condition: service_healthy
+  #     kafka_2:
+  #       condition: service_healthy
+  #     kafka_3:
+  #       condition: service_healthy
+  #   environment:
+  #     KSQL_BOOTSTRAP_SERVERS: kafka_1:9092,kafka_2:9094,kafka_3:9096
+  #   ports:
+  #     - "8088:8088"
+  #   networks:
+  #     - kafka-network
+  #   restart: always
 
-  ksqldb-cli:
-    image: confluentinc/ksqldb-cli:latest
-    depends_on:
-      - ksqldb-server
-    entrypoint: /bin/sh -c 'exec ksql http://ksqldb-server:8088'
-    stdin_open: true
-    tty: true
-    networks:
-      - kafka-network
-    restart: always
+  # ksqldb-cli:
+  #   image: confluentinc/ksqldb-cli:latest
+  #   depends_on:
+  #     - ksqldb-server
+  #   entrypoint: /bin/sh -c 'exec ksql http://ksqldb-server:8088'
+  #   stdin_open: true
+  #   tty: true
+  #   networks:
+  #     - kafka-network
+  #   restart: always
 
 networks:
   kafka-network:

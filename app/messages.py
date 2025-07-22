@@ -19,6 +19,7 @@ FETCH_MIN_BYTES = os.getenv('FETCH_MIN_BYTES', 1)
 FETCH_WAIT_MAX_MS = os.getenv('FETCH_WAIT_MAX_MS', 100)
 RETRIES = os.getenv('RETRIES', '3')
 SESSION_TIME_MS = os.getenv('SESSION_TIME_MS', 1_000)
+LINGER_MS = os.getenv('LINGER_MS', 0)
 TOPIC = os.getenv('TOPIC', 'practice')
 FORBIDDEN_WORDS = ["spam", "skam", "windows"]
 
@@ -47,6 +48,8 @@ conf = {
 producer_conf = conf | {
     "acks": ACKS_LEVEL,
     "retries": RETRIES,
+    "linger.ms": LINGER_MS,
+    "compression.type": "none"
 }
 
 base_consumer_conf = conf | {
